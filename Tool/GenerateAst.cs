@@ -40,6 +40,8 @@ namespace Tool
 				writer.WriteLine("\tabstract class " + baseName);
 				writer.WriteLine("\t{");
 
+				DefineVisitor(writer, baseName, types);
+
 				// The AST classes.
 				foreach (string type in types)
 				{
@@ -48,9 +50,29 @@ namespace Tool
 					DefineType(writer, baseName, className, fields);
 				}
 
+				// the base accept method
+				writer.WriteLine();
+				writer.WriteLine("\t\tpublic abstract R Accept<R>(IVisitor<R> visitor);");
+
 				writer.WriteLine("\t}");
 				writer.WriteLine("}");
 			}	
+		}
+
+		private static void DefineVisitor(
+			StreamWriter writer,
+			string baseName,
+			List<string> types
+		)
+		{
+			writer.WriteLine("\t\tpublic interface IVisitor<R>");
+			writer.WriteLine("\t\t{");
+			foreach(string type in types)
+			{
+				string typeName = type.Split(":")[0].Trim();
+				writer.WriteLine("\t\t\tR visit" + typeName + baseName + "(" + typeName + " " + baseName.ToLower() + ");");
+			}
+			writer.WriteLine("\t\t}");
 		}
 
 		private static void DefineType(
@@ -60,7 +82,7 @@ namespace Tool
 			string fieldList
 		)
 		{
-			writer.WriteLine("\t\tclass " + className + " : " + baseName);
+			writer.WriteLine("\t\tpublic class " + className + " : " + baseName);
 			writer.WriteLine("\t\t{");
 
 			// constructor
@@ -82,6 +104,14 @@ namespace Tool
 			{
 				writer.WriteLine("\t\t\tpublic readonly " + field + ";");
 			}
+
+			// visitor pattern
+			writer.WriteLine();
+			writer.WriteLine("\t\t\tpublic override R Accept<R>(IVisitor<R> visitor)");
+			writer.WriteLine("\t\t\t{");
+			writer.WriteLine("\t\t\t\treturn visitor.visit" + className + baseName + "(this);");
+			writer.WriteLine("\t\t\t}");
+			
 			writer.WriteLine("\t\t}");
 		}
 	}

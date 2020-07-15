@@ -5,7 +5,14 @@ namespace Iglu
 {
 	abstract class Expr
 	{
-		class Binary : Expr
+		public interface IVisitor<R>
+		{
+			R visitBinaryExpr(Binary expr);
+			R visitGroupingExpr(Grouping expr);
+			R visitLiteralExpr(Literal expr);
+			R visitUnaryExpr(Unary expr);
+		}
+		public class Binary : Expr
 		{
 			public Binary(Expr left, Token oper, Expr right)
 			{
@@ -17,8 +24,13 @@ namespace Iglu
 			public readonly Expr left;
 			public readonly Token oper;
 			public readonly Expr right;
+
+			public override R Accept<R>(IVisitor<R> visitor)
+			{
+				return visitor.visitBinaryExpr(this);
+			}
 		}
-		class Grouping : Expr
+		public class Grouping : Expr
 		{
 			public Grouping(Expr expression)
 			{
@@ -26,8 +38,13 @@ namespace Iglu
 			}
 
 			public readonly Expr expression;
+
+			public override R Accept<R>(IVisitor<R> visitor)
+			{
+				return visitor.visitGroupingExpr(this);
+			}
 		}
-		class Literal : Expr
+		public class Literal : Expr
 		{
 			public Literal(Object value)
 			{
@@ -35,8 +52,13 @@ namespace Iglu
 			}
 
 			public readonly Object value;
+
+			public override R Accept<R>(IVisitor<R> visitor)
+			{
+				return visitor.visitLiteralExpr(this);
+			}
 		}
-		class Unary : Expr
+		public class Unary : Expr
 		{
 			public Unary(Token oper, Expr right)
 			{
@@ -46,6 +68,13 @@ namespace Iglu
 
 			public readonly Token oper;
 			public readonly Expr right;
+
+			public override R Accept<R>(IVisitor<R> visitor)
+			{
+				return visitor.visitUnaryExpr(this);
+			}
 		}
+
+		public abstract R Accept<R>(IVisitor<R> visitor);
 	}
 }
