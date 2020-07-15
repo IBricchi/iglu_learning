@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{9295F1D4-CBA8-47BC-84A9-F5C0A22BC779}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>iglu</RootNamespace>
+    <RootNamespace>Iglu</RootNamespace>
     <AssemblyName>iglu</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="AstPrinter.cs" />
     <Compile Include="Expr.cs" />
+    <Compile Include="Parser.cs" />
     <Compile Include="Scanner.cs" />
     <Compile Include="Token.cs" />
     <Compile Include="TokenType.cs" />

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using iglu;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -66,10 +67,20 @@ namespace Iglu
 		{
 			Scanner scanner = new Scanner(source);
 			List<Token> tokens = scanner.ScanTokens();
-			foreach(Token token in tokens)
-			{
-				Console.Out.WriteLine(token);
-			}
+
+			// prints out each token
+			// foreach(Token token in tokens)
+			// {
+			//	 Console.Out.WriteLine(token);
+			// }
+
+			Parser parser = new Parser(tokens);
+			Expr expression = parser.Parse();
+
+			// stop if syntax error
+			if (hadError) return;
+
+			Console.Out.WriteLine(new AstPrinter().Print(expression));
 		}
 
 		public static void Error(int line, string message)
@@ -83,6 +94,18 @@ namespace Iglu
 				"[line " + line + " ] Error" + where + ": " + message
 			);
 			hadError = true;
+		}
+
+		public static void Error(Token token, string message)
+		{
+			if (token.type == TokenType.EOF)
+			{
+				Report(token.line, " at end", message);
+			}
+			else
+			{
+				Report(token.line, " at '" + token.lexeme + "'", message);
+			}
 		}
 	}
 		
