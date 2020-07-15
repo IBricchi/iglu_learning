@@ -157,11 +157,10 @@ namespace Iglu
 				case '/':
 					if(Match('/'))
 					{
-						// A comment goes until the end of the line
-						while(Peek() != '\n' && !IsAtEnd())
-						{
-							Advance();
-						}
+						LineCommnet();
+					}else if(Match('*'))
+					{
+						MultiLineComment();
 					}
 					else
 					{
@@ -202,6 +201,35 @@ namespace Iglu
 			}
 		}
 
+		private void LineCommnet()
+		{
+			while (Peek() != '\n' && !IsAtEnd())
+			{
+				Advance();
+			}
+		}
+		private void MultiLineComment()
+		{
+			while(!(Peek() == '*' && PeekNext() == '/') && !IsAtEnd())
+			{
+				if(Peek() == '\n')
+				{
+					line++;
+				}
+				Advance();
+			}
+
+			if(IsAtEnd())
+			{
+				Program.Error(line, "Unterminated comment");
+			}
+			else
+			{
+				// consume the */
+				Advance(); Advance();
+			}
+		}
+
 		private void String()
 		{
 			while(Peek() != '"' && !IsAtEnd())
@@ -218,9 +246,11 @@ namespace Iglu
 			{
 				Program.Error(line, "Unterminated string");
 			}
-
-			// Consume the closing ".
-			Advance();
+			else
+			{
+				// Consume the closing ".
+				Advance();
+			}
 
 			// Trim the surrounding quotes.
 			string value = source.Substring(start + 1, length - 2);
