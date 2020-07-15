@@ -42,7 +42,7 @@ namespace Iglu
 			this.source = source;
 		}
 
-		internal List<Token> ScanTokens()
+		public List<Token> ScanTokens()
 		{
 			while(!IsAtEnd())
 			{
