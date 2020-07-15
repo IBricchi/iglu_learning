@@ -1,30 +1,51 @@
-﻿using Iglu;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace iglu
+namespace Iglu
 {
 	abstract class Expr
 	{
 		class Binary : Expr
 		{
 			public Binary(Expr left, Token oper, Expr right)
-			: base(left, oper, right) { }
-		}
+			{
+				this.left = left;
+				this.oper = oper;
+				this.right = right;
+			}
 
-		public Expr(Expr left, Token oper, Expr right)
+			public readonly Expr left;
+			public readonly Token oper;
+			public readonly Expr right;
+		}
+		class Grouping : Expr
 		{
-			this.left = left;
-			this.oper = oper;
-			this.right = right;
+			public Grouping(Expr expression)
+			{
+				this.expression = expression;
+			}
+
+			public readonly Expr expression;
 		}
+		class Literal : Expr
+		{
+			public Literal(Object value)
+			{
+				this.value = value;
+			}
 
-		internal readonly Expr left;
-		internal readonly Token oper;
-		internal readonly Expr right;
+			public readonly Object value;
+		}
+		class Unary : Expr
+		{
+			public Unary(Token oper, Expr right)
+			{
+				this.oper = oper;
+				this.right = right;
+			}
 
+			public readonly Token oper;
+			public readonly Expr right;
+		}
 	}
 }

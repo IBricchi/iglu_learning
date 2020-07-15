@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Tool": {
+      "commandName": "Project"
+    },
+    "GenerateAst": {
+      "commandName": "Project",
+      "commandLineArgs": "GenerateAst \"C:\\Users\\IBricchi\\OneDrive - Imperial College London\\Documents\\programming\\Working\\iglu\\iglu\""
+    }
+  }
+}
