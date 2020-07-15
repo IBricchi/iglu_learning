@@ -114,13 +114,14 @@ namespace Iglu
 					switch (Peek().type)
 					{
 						case TokenType.CLASS:
+						case TokenType.COMMA:
 						case TokenType.DEF:
-						case TokenType.LET:
 						case TokenType.FOR:
 						case TokenType.IF:
-						case TokenType.WHILE:
+						case TokenType.LET:
 						case TokenType.PRINT:
 						case TokenType.RETURN:
+						case TokenType.WHILE:
 							return;
 					}
 
@@ -131,7 +132,40 @@ namespace Iglu
 
 		private Expr Expression()
 		{
-			return Equality();
+			return Commation();
+		}
+
+		private Expr Commation() // terrible name I know
+		{
+			Expr expr = Ternary();
+
+			while(Match(TokenType.COMMA))
+			{
+				Token oper = Previous();
+				Expr right = Ternary();
+				expr = new Expr.Binary(expr, oper, right);
+			}
+
+			return expr;
+		}
+
+		private Expr Ternary()
+		{
+			Expr expr = Equality();
+
+			while (Match(TokenType.QUESTION))
+			{
+				Token oper1 = Previous();
+				Expr ifTrue = Expression();
+				Consume(TokenType.COLON, "Expecting ':' as part of ternary operator.");
+				Token oper2 = Previous();
+				Expr ifFalse = Equality();
+
+				Expr ifs = new Expr.Binary(ifTrue, oper2, ifFalse);
+				expr = new Expr.Binary(expr, oper1, ifs);
+			}
+
+			return expr;
 		}
 
 		private Expr Equality()
