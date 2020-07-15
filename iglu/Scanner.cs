@@ -14,6 +14,7 @@ namespace Iglu
 
 		private int start = 0;
 		private int current = 0;
+		private int length = 0;
 		private int line = 1;
 
 		private static readonly Dictionary<String, TokenType> keywords = new Dictionary<string, TokenType>()
@@ -44,6 +45,7 @@ namespace Iglu
 		{
 			while(!IsAtEnd())
 			{
+				length = 0;
 				start = current;
 				ScanToken();
 			}
@@ -63,6 +65,7 @@ namespace Iglu
 				return false;
 			}
 
+			length++;
 			current++;
 			return true;
 		}
@@ -111,6 +114,7 @@ namespace Iglu
 
 		private char Advance()
 		{
+			length++;
 			current++;
 			return source[current - 1];
 		}
@@ -121,7 +125,7 @@ namespace Iglu
 		}
 		private void AddToken(TokenType type, Object literal)
 		{
-			string text = source.Substring(start, current);
+			string text = source.Substring(start, length);
 			tokens.Add(new Token(type, text, literal, line));
 		}
 
@@ -219,7 +223,7 @@ namespace Iglu
 			Advance();
 
 			// Trim the surrounding quotes.
-			string value = source.Substring(start + 1, current - 1);
+			string value = source.Substring(start + 1, length - 2);
 			AddToken(TokenType.STRING, value);
 		}
 
@@ -240,7 +244,7 @@ namespace Iglu
 			}
 
 
-			double value = Double.Parse(source.Substring(start, current));
+			double value = Double.Parse(source.Substring(start, length));
 			AddToken(TokenType.NUMBER, value);
 		}
 
@@ -251,7 +255,7 @@ namespace Iglu
 				Advance();
 			}
 
-			string text = source.Substring(start, current);
+			string text = source.Substring(start, length);
 
 			TokenType type;
 			if(!keywords.TryGetValue(text, out type))
