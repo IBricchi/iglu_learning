@@ -21,6 +21,7 @@ namespace Iglu
 		{
 			{ "and", TokenType.AND },
 			{ "class", TokenType.CLASS },
+			{ "childof", TokenType.CHILDOF },
 			{ "def", TokenType.DEF },
 			{ "else", TokenType.ELSE },
 			{ "false", TokenType.FALSE },
