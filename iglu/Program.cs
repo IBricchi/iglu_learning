@@ -59,6 +59,7 @@ namespace Iglu
 				}
 				else
 				{
+					if (!line.EndsWith(';')) line += ';';
 					Run(line);
 					hadError = false;
 				}
