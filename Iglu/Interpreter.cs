@@ -5,14 +5,18 @@ using System.Text;
 
 namespace Iglu
 {
-	class Interpreter : Expr.IVisitor<object>
+	class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<Void>
 	{
-		public void Interpret(Expr expr)
+		private Env environment = new Env();
+
+		public void Interpret(List<Stmt> statements)
 		{
 			try
 			{
-				object value = Evaluate(expr);
-				Console.WriteLine(Stringify(value));
+				foreach(Stmt statement in statements)
+				{
+					Execute(statement);
+				}
 			}
 			catch(RuntimeError error)
 			{
@@ -29,7 +33,7 @@ namespace Iglu
 
 			if (obj is bool) return IsTruthy(obj) ? "true" : "false";
 
-			if (obj is string) return (string)obj;
+			if (obj is string @string) return @string;
 
 			return "";
 		}
@@ -37,6 +41,11 @@ namespace Iglu
 		private object Evaluate(Expr expr)
 		{
 			return expr.Accept(this);
+		}
+
+		private void Execute(Stmt statement)
+		{
+			statement.Accept(this);
 		}
 
 		private bool IsTruthy(object obj)
@@ -63,6 +72,14 @@ namespace Iglu
 		{
 			if (left is double && right is double) return;
 			throw new RuntimeError(oper, "Operands must be numbers.");
+		}
+
+		public object visitAssignExpr(Expr.Assign expr)
+		{
+			object value = Evaluate(expr.value);
+
+			environment.Assign(expr.name, value);
+			return value;
 		}
 
 		public object visitBinaryExpr(Expr.Binary expr)
@@ -154,6 +171,36 @@ namespace Iglu
 			}
 
 			return null; // should be unreachable
+		}
+
+		public object visitVariableExpr(Expr.Variable expr)
+		{
+			return environment.Get(expr.name);
+		}
+
+		public Void visitExpressionStmt(Stmt.Expression stmt)
+		{
+			Evaluate(stmt.expression);
+			return null;
+		}
+
+		public Void visitPrintStmt(Stmt.Print stmt)
+		{
+			object value = Evaluate(stmt.expression);
+			Console.WriteLine(Stringify(value));
+			return null;
+		}
+
+		public Void visitLetStmt(Stmt.Let stmt)
+		{
+			object value = null;
+			if(stmt.initializer != null)
+			{
+				value = Evaluate(stmt.initializer);
+			}
+
+			environment.Define(stmt.name.lexeme, value);
+			return null;
 		}
 	}
 }

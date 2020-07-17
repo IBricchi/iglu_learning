@@ -19,10 +19,18 @@ namespace Tool
 			{
 				String outputDir = args[0];
 				DefineAst(outputDir, "Expr", new List<string>(){
+					"Assign   : Token name, Expr value",
 					"Binary   : Expr left, Token oper, Expr right",
 					"Grouping : Expr expression",
 					"Literal  : object value",
-					"Unary    : Token oper, Expr right"
+					"Unary    : Token oper, Expr right",
+					"Variable : Token name"
+				});
+
+				DefineAst(outputDir, "Stmt", new List<string>(){
+					"Expression : Expr expression",
+					"Print      : Expr expression",
+					"Let        : Token name, Expr initializer"
 				});
 			}
 		}

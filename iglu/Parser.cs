@@ -1,6 +1,7 @@
 ﻿using Iglu;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,16 +20,15 @@ namespace Iglu
 			this.tokens = tokens;
 		}
 
-		public Expr Parse()
+		public List<Stmt> Parse()
 		{
-			try
+			List<Stmt> statements = new List<Stmt>();
+			while(!IsAtEnd())
 			{
-				return Expression();
+				statements.Add(Declaration());
 			}
-			catch (ParseError error)
-			{
-				return null;
-			}
+
+			return statements;
 		}
 
 		private bool Match(params TokenType[] types)
@@ -132,7 +132,77 @@ namespace Iglu
 
 		private Expr Expression()
 		{
-			return Commation();
+			return Assignment();
+		}
+
+		private Stmt Declaration()
+		{
+			try
+			{
+				if (Match(TokenType.LET)) return LetDeclaration();
+
+				return Statement();
+			}
+			catch(ParseError error)
+			{
+				Synchronize();
+				return null;
+			}
+		}
+
+		private Stmt LetDeclaration()
+		{
+			Token name = Consume(TokenType.IDENTIFIER, "Expected a variable name.");
+
+			Expr initializer = null;
+			if(Match(TokenType.EQUAL))
+			{
+				initializer = Expression();
+			}
+
+			Consume(TokenType.SEMICOLON, "Expect ';' after variable declaration");
+			return new Stmt.Let(name, initializer);
+		}
+
+		private Stmt Statement()
+		{
+			if (Match(TokenType.PRINT)) return PrintStatement();
+
+			return ExpressionStatement();
+		}
+
+		private Stmt PrintStatement()
+		{
+			Expr value = Expression();
+			Consume(TokenType.SEMICOLON, "Expect ';' after value.");
+			return new Stmt.Print(value);
+		}
+
+		private Stmt ExpressionStatement()
+		{
+			Expr value = Expression();
+			Consume(TokenType.SEMICOLON, "Expect ';' after value.");
+			return new Stmt.Expression(value);
+		}
+
+		private Expr Assignment()
+		{
+			Expr expr = Commation();
+
+			if(Match(TokenType.EQUAL))
+			{
+				Token equals = Previous();
+				Expr value = Assignment();
+
+				if(expr is Expr.Variable)
+				{
+					Token name = ((Expr.Variable)expr).name;
+					return new Expr.Assign(name, value);
+				}
+				Error(equals, "Invalid assignment target.");
+			}
+
+			return expr;
 		}
 
 		private Expr Commation() // terrible name I know
@@ -240,23 +310,27 @@ namespace Iglu
 
 		private Expr Primary()
 		{
-			if(Match(TokenType.FALSE))
+			if (Match(TokenType.FALSE))
 			{
 				return new Expr.Literal(false);
 			}
-			else if(Match(TokenType.TRUE))
+			else if (Match(TokenType.TRUE))
 			{
 				return new Expr.Literal(true);
 			}
-			else if(Match(TokenType.NULL))
+			else if (Match(TokenType.NULL))
 			{
 				return new Expr.Literal(null);
 			}
-			else if(Match(TokenType.NUMBER, TokenType.STRING))
+			else if (Match(TokenType.NUMBER, TokenType.STRING))
 			{
 				return new Expr.Literal(Previous().literal);
 			}
-			else if(Match(TokenType.LEFT_PAREN))
+			else if (Match(TokenType.IDENTIFIER))
+			{
+				return new Expr.Variable(Previous());
+			}
+			else if (Match(TokenType.LEFT_PAREN))
 			{
 				Expr expr = Expression();
 				Consume(TokenType.RIGHT_PAREN, "Expecting ')' after expression.");

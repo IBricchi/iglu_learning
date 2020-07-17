@@ -13,7 +13,12 @@ namespace iglu
 		{
 			return expr.Accept(this);
 		}
-		
+
+		public string visitAssignExpr(Expr.Assign expr)
+		{
+			throw new NotImplementedException();
+		}
+
 		public string visitBinaryExpr(Expr.Binary expr)
 		{
 			return Parenthesize(expr.oper.lexeme, expr.left, expr.right);
@@ -34,6 +39,11 @@ namespace iglu
 		public string visitUnaryExpr(Expr.Unary expr)
 		{
 			return Parenthesize(expr.oper.lexeme, expr.right);
+		}
+
+		public string visitVariableExpr(Expr.Variable expr)
+		{
+			throw new NotImplementedException();
 		}
 
 		private string Parenthesize(string name, params Expr[] exprs)

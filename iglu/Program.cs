@@ -77,7 +77,7 @@ namespace Iglu
 			// }
 
 			Parser parser = new Parser(tokens);
-			Expr expression = parser.Parse();
+			List<Stmt> statements = parser.Parse();
 
 			// stop if syntax error
 			if (hadError) return;
@@ -86,7 +86,7 @@ namespace Iglu
 			// Console.Out.WriteLine(new AstPrinter().Print(expression));
 
 			// interpret
-			interpreter.Interpret(expression);
+			interpreter.Interpret(statements);
 
 		}
 
