@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "Iglu": {
+      "commandName": "Project"
+    },
+    "REPL": {
+      "commandName": "Project"
+    },
+    "Test File": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Users\\IBricchi\\OneDrive - Imperial College London\\Documents\\programming\\Working\\iglu\\iglu\\test_file.ig\""
+    }
+  }
+}

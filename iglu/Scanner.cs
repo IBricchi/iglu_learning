@@ -34,6 +34,7 @@ namespace Iglu
 			{ "return", TokenType.RETURN },
 			{ "parent", TokenType.PARENT },
 			{ "this", TokenType.THIS },
+			{ "true", TokenType.TRUE },
 			{ "while", TokenType.WHILE }
 		};
 
