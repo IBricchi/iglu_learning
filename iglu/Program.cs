@@ -8,9 +8,13 @@ using System.Threading.Tasks;
 
 namespace Iglu
 {
-	class Program
+	static class Program
 	{
-		static bool hadError = false;
+		private static readonly Interpreter interpreter = new Interpreter();
+
+		public static bool hadError = false;
+		public static bool hadRuntimeError = false;
+
 		static void Main(string[] args)
 		{
 			if (args.Length > 1)
@@ -36,10 +40,8 @@ namespace Iglu
 			Run(File.ReadAllText(path));
 
 			// Indicate an error in the exit code.
-			if (hadError)
-			{
-				Environment.Exit(65);
-			}
+			if (hadError) Environment.Exit(65);
+			if (hadRuntimeError) Environment.Exit(70);
 		}
 
 		private static void RunPrompt()
@@ -80,7 +82,12 @@ namespace Iglu
 			// stop if syntax error
 			if (hadError) return;
 
-			Console.Out.WriteLine(new AstPrinter().Print(expression));
+			// prints out parsed tree
+			// Console.Out.WriteLine(new AstPrinter().Print(expression));
+
+			// interpret
+			interpreter.Interpret(expression);
+
 		}
 
 		public static void Error(int line, string message)
@@ -106,6 +113,12 @@ namespace Iglu
 			{
 				Report(token.line, " at '" + token.lexeme + "'", message);
 			}
+		}
+
+		public static void RuntimeError(RuntimeError error)
+		{
+			Console.Error.WriteLine(error.Message + "\n[line" + error.token.line + "]");
+			hadRuntimeError = true;
 		}
 	}
 		

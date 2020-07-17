@@ -46,12 +46,12 @@ namespace Iglu
 		}
 		public class Literal : Expr
 		{
-			public Literal(Object value)
+			public Literal(object value)
 			{
 				this.value = value;
 			}
 
-			public readonly Object value;
+			public readonly object value;
 
 			public override R Accept<R>(IVisitor<R> visitor)
 			{

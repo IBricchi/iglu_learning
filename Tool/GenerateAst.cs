@@ -21,7 +21,7 @@ namespace Tool
 				DefineAst(outputDir, "Expr", new List<string>(){
 					"Binary   : Expr left, Token oper, Expr right",
 					"Grouping : Expr expression",
-					"Literal  : Object value",
+					"Literal  : object value",
 					"Unary    : Token oper, Expr right"
 				});
 			}

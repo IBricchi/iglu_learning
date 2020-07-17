@@ -10,10 +10,10 @@ namespace Iglu
 	{
 		public readonly TokenType type;
 		public readonly string lexeme;
-		public readonly Object literal;
+		public readonly object literal;
 		public readonly int line;
 
-		public Token(TokenType type, String lexeme, Object literal, int line)
+		public Token(TokenType type, String lexeme, object literal, int line)
 		{
 			this.type = type;
 			this.lexeme = lexeme;
