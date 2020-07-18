@@ -8,9 +8,14 @@ namespace Iglu
 	class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<Void>
 	{
 		private Env environment = new Env();
+		private bool REPL;
 
-		public void Interpret(List<Stmt> statements)
+		public void Interpret(List<Stmt> statements, bool REPL)
 		{
+			this.REPL = REPL;
+
+			if (statements.Count != 1) this.REPL = false;
+
 			try
 			{
 				foreach(Stmt statement in statements)
@@ -198,13 +203,17 @@ namespace Iglu
 
 		public Void visitBlockStmt(Stmt.Block stmt)
 		{
+			bool previous = REPL;
+			REPL = false;
 			ExecuteBlock(stmt.statements, new Env(environment));
+			REPL = previous;
 			return null;
 		}
 
 		public Void visitExpressionStmt(Stmt.Expression stmt)
 		{
-			Evaluate(stmt.expression);
+			object value = Evaluate(stmt.expression);
+			if (REPL) Console.Out.WriteLine(Stringify(value));
 			return null;
 		}
 

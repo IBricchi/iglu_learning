@@ -59,14 +59,13 @@ namespace Iglu
 				}
 				else
 				{
-					if (!line.EndsWith(';')) line += ';';
-					Run(line);
+					Run(line, true);
 					hadError = false;
 				}
 			}
 		}
 
-		private static void Run(string source)
+		private static void Run(string source, bool REPL = false)
 		{
 			Scanner scanner = new Scanner(source);
 			List<Token> tokens = scanner.ScanTokens();
@@ -87,7 +86,7 @@ namespace Iglu
 			// Console.Out.WriteLine(new AstPrinter().Print(expression));
 
 			// interpret
-			interpreter.Interpret(statements);
+			interpreter.Interpret(statements, REPL);
 
 		}
 
