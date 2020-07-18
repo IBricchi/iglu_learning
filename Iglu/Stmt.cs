@@ -7,9 +7,24 @@ namespace Iglu
 	{
 		public interface IVisitor<R>
 		{
+			R visitBlockStmt(Block stmt);
 			R visitExpressionStmt(Expression stmt);
 			R visitPrintStmt(Print stmt);
 			R visitLetStmt(Let stmt);
+		}
+		public class Block : Stmt
+		{
+			public Block(List<Stmt> statements)
+			{
+				this.statements = statements;
+			}
+
+			public readonly List<Stmt> statements;
+
+			public override R Accept<R>(IVisitor<R> visitor)
+			{
+				return visitor.visitBlockStmt(this);
+			}
 		}
 		public class Expression : Stmt
 		{

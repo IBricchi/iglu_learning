@@ -48,6 +48,24 @@ namespace Iglu
 			statement.Accept(this);
 		}
 
+		private void ExecuteBlock(List<Stmt> statements, Env environment)
+		{
+			Env previous = this.environment;
+			try
+			{
+				this.environment = environment;
+
+				foreach(Stmt statement in statements)
+				{
+					Execute(statement);
+				}
+			}
+			finally
+			{
+				this.environment = previous;
+			}
+		}
+
 		private bool IsTruthy(object obj)
 		{
 			if (obj == null) return false;
@@ -176,6 +194,12 @@ namespace Iglu
 		public object visitVariableExpr(Expr.Variable expr)
 		{
 			return environment.Get(expr.name);
+		}
+
+		public Void visitBlockStmt(Stmt.Block stmt)
+		{
+			ExecuteBlock(stmt.statements, new Env(environment));
+			return null;
 		}
 
 		public Void visitExpressionStmt(Stmt.Expression stmt)

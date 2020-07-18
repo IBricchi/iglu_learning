@@ -28,6 +28,7 @@ namespace Tool
 				});
 
 				DefineAst(outputDir, "Stmt", new List<string>(){
+					"Block      : List<Stmt> statements",
 					"Expression : Expr expression",
 					"Print      : Expr expression",
 					"Let        : Token name, Expr initializer"
