@@ -7,11 +7,15 @@ namespace Iglu
 {
 	class Interpreter : Expr.IVisitor<object>, Stmt.IVisitor<Void>
 	{
-		private Env environment = new Env();
+		public readonly Env globals = new Env();
+		private Env environment;
 		private bool REPL;
 
 		public void Interpret(List<Stmt> statements, bool REPL)
 		{
+			environment = globals;
+			NativeFunctions.AddNativeFunctions.AddAll(globals);
+
 			this.REPL = REPL;
 
 			if (statements.Count != 1) this.REPL = false;
@@ -108,21 +112,25 @@ namespace Iglu
 		public object visitBinaryExpr(Expr.Binary expr)
 		{
 			object left = Evaluate(expr.left);
-			object right = Evaluate(expr.right);	
+			object right;
 
 			switch(expr.oper.type)
 			{
 				// arithmatic
 				case TokenType.MINUS:
+					right = Evaluate(expr.right);
 					CheckNumberOperand(expr.oper, left, right);
 					return (double)left - (double)right;
 				case TokenType.SLASH:
+					right = Evaluate(expr.right);
 					CheckNumberOperand(expr.oper, left, right);
 					return (double)left / (double)right;
 				case TokenType.STAR:
+					right = Evaluate(expr.right);
 					CheckNumberOperand(expr.oper, left, right);
 					return (double)left * (double)right;
 				case TokenType.PLUS:
+					right = Evaluate(expr.right);
 					if (left is double && right is double)
 					{
 						return (double)left + (double)right;
@@ -134,24 +142,30 @@ namespace Iglu
 					throw new RuntimeError(expr.oper, "Operand must be two numbers or two strings.");
 				// comparisons
 				case TokenType.GREATER:
+					right = Evaluate(expr.right);
 					CheckNumberOperand(expr.oper, left, right);
 					return (double)left > (double)right;
 				case TokenType.GREATER_EQUAL:
+					right = Evaluate(expr.right);
 					CheckNumberOperand(expr.oper, left, right);
 					return (double)left >= (double)right;
 				case TokenType.LESS:
+					right = Evaluate(expr.right);
 					CheckNumberOperand(expr.oper, left, right);
 					return (double)left < (double)right;
 				case TokenType.LESS_EQUAL:
+					right = Evaluate(expr.right);
 					CheckNumberOperand(expr.oper, left, right);
 					return (double)left <= (double)right;
 				case TokenType.EQUAL_EQUAL:
+					right = Evaluate(expr.right);
 					return IsEqual(left, right);
 				case TokenType.BANG_EQUAL:
+					right = Evaluate(expr.right);
 					return !IsEqual(left, right);
 				// other operators
 				case TokenType.COMMA:
-					Evaluate(expr.left);
+					right = Evaluate(expr.right);
 					return right;
 				case TokenType.QUESTION:
 					Expr.Binary ifs = (Expr.Binary)expr.right;
@@ -163,11 +177,42 @@ namespace Iglu
 					{
 						return Evaluate(ifs.right);
 					}
+				case TokenType.AND:
+					if (!IsTruthy(left)) return left;
+					return Evaluate(expr.right);
+				case TokenType.OR:
+					if (IsTruthy(left)) return left;
+					return Evaluate(expr.right);
 				default:
 					break;
 			}
 
 			return null; // should be unreachable;
+		}
+
+		public object visitCallExpr(Expr.Call expr)
+		{
+			object callee = Evaluate(expr.callee);
+
+			if(!(callee is ICallable))
+			{
+				throw new RuntimeError(expr.paren, "Can only call on functions and classes.");
+			}
+
+			List<object> args = new List<object>();
+			foreach(Expr arg in expr.args)
+			{
+				args.Add(Evaluate(arg));
+			}
+
+			ICallable function = (ICallable)callee;
+			
+			if(args.Count != function.Arity())
+			{
+				throw new RuntimeError(expr.paren, "Expected " + function.Arity() + " arguments but got " + args.Count + ".");
+			}
+			
+			return function.Call(this, args);
 		}
 
 		public object visitGroupingExpr(Expr.Grouping expr)
@@ -210,6 +255,21 @@ namespace Iglu
 			return null;
 		}
 
+		public Void visitIfStmt(Stmt.If stmt)
+		{
+			bool cond = IsTruthy(Evaluate(stmt.condition));
+
+			if(cond)
+			{
+				Execute(stmt.then);
+			}else if(stmt.el != null)
+			{
+				Execute(stmt.el);
+			}
+
+			return null;
+		}
+
 		public Void visitExpressionStmt(Stmt.Expression stmt)
 		{
 			object value = Evaluate(stmt.expression);
@@ -233,6 +293,16 @@ namespace Iglu
 			}
 
 			environment.Define(stmt.name.lexeme, value);
+			return null;
+		}
+
+		public Void visitWhileStmt(Stmt.While stmt)
+		{
+			while(IsTruthy(Evaluate(stmt.condition)))
+			{
+				Execute(stmt.body);
+			}
+
 			return null;
 		}
 	}

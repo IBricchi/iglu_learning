@@ -22,7 +22,11 @@ namespace iglu
 		public string visitBinaryExpr(Expr.Binary expr)
 		{
 			return Parenthesize(expr.oper.lexeme, expr.left, expr.right);
-			
+		}
+
+		public string visitCallExpr(Expr.Call expr)
+		{
+			throw new NotImplementedException();
 		}
 
 		public string visitGroupingExpr(Expr.Grouping expr)

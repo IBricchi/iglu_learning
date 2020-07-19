@@ -21,6 +21,7 @@ namespace Tool
 				DefineAst(outputDir, "Expr", new List<string>(){
 					"Assign   : Token name, Expr value",
 					"Binary   : Expr left, Token oper, Expr right",
+					"Call     : Expr callee, Token paren, List<Expr> args",
 					"Grouping : Expr expression",
 					"Literal  : object value",
 					"Unary    : Token oper, Expr right",
@@ -29,9 +30,11 @@ namespace Tool
 
 				DefineAst(outputDir, "Stmt", new List<string>(){
 					"Block      : List<Stmt> statements",
+					"If         : Expr condition, Stmt then, Stmt el",
 					"Expression : Expr expression",
 					"Print      : Expr expression",
-					"Let        : Token name, Expr initializer"
+					"Let        : Token name, Expr initializer",
+					"While      : Expr condition, Stmt body"
 				});
 			}
 		}

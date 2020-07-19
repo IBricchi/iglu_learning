@@ -8,9 +8,11 @@ namespace Iglu
 		public interface IVisitor<R>
 		{
 			R visitBlockStmt(Block stmt);
+			R visitIfStmt(If stmt);
 			R visitExpressionStmt(Expression stmt);
 			R visitPrintStmt(Print stmt);
 			R visitLetStmt(Let stmt);
+			R visitWhileStmt(While stmt);
 		}
 		public class Block : Stmt
 		{
@@ -24,6 +26,24 @@ namespace Iglu
 			public override R Accept<R>(IVisitor<R> visitor)
 			{
 				return visitor.visitBlockStmt(this);
+			}
+		}
+		public class If : Stmt
+		{
+			public If(Expr condition, Stmt then, Stmt el)
+			{
+				this.condition = condition;
+				this.then = then;
+				this.el = el;
+			}
+
+			public readonly Expr condition;
+			public readonly Stmt then;
+			public readonly Stmt el;
+
+			public override R Accept<R>(IVisitor<R> visitor)
+			{
+				return visitor.visitIfStmt(this);
 			}
 		}
 		public class Expression : Stmt
@@ -68,6 +88,22 @@ namespace Iglu
 			public override R Accept<R>(IVisitor<R> visitor)
 			{
 				return visitor.visitLetStmt(this);
+			}
+		}
+		public class While : Stmt
+		{
+			public While(Expr condition, Stmt body)
+			{
+				this.condition = condition;
+				this.body = body;
+			}
+
+			public readonly Expr condition;
+			public readonly Stmt body;
+
+			public override R Accept<R>(IVisitor<R> visitor)
+			{
+				return visitor.visitWhileStmt(this);
 			}
 		}
 

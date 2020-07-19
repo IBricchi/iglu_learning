@@ -9,6 +9,7 @@ namespace Iglu
 		{
 			R visitAssignExpr(Assign expr);
 			R visitBinaryExpr(Binary expr);
+			R visitCallExpr(Call expr);
 			R visitGroupingExpr(Grouping expr);
 			R visitLiteralExpr(Literal expr);
 			R visitUnaryExpr(Unary expr);
@@ -46,6 +47,24 @@ namespace Iglu
 			public override R Accept<R>(IVisitor<R> visitor)
 			{
 				return visitor.visitBinaryExpr(this);
+			}
+		}
+		public class Call : Expr
+		{
+			public Call(Expr callee, Token paren, List<Expr> args)
+			{
+				this.callee = callee;
+				this.paren = paren;
+				this.args = args;
+			}
+
+			public readonly Expr callee;
+			public readonly Token paren;
+			public readonly List<Expr> args;
+
+			public override R Accept<R>(IVisitor<R> visitor)
+			{
+				return visitor.visitCallExpr(this);
 			}
 		}
 		public class Grouping : Expr

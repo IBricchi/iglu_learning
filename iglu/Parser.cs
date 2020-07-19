@@ -143,7 +143,7 @@ namespace Iglu
 
 				return Statement();
 			}
-			catch(ParseError error)
+			catch(ParseError)
 			{
 				Synchronize();
 				return null;
@@ -166,10 +166,82 @@ namespace Iglu
 
 		private Stmt Statement()
 		{
+			if (Match(TokenType.FOR)) return ForStatement();
+			if (Match(TokenType.IF)) return IfStatement();
 			if (Match(TokenType.PRINT)) return PrintStatement();
+			if (Match(TokenType.WHILE)) return WhileStatement();
 			if (Match(TokenType.LEFT_BRACE)) return new Stmt.Block(Block());
 
 			return ExpressionStatement();
+		}
+
+		private Stmt ForStatement()
+		{
+			Consume(TokenType.LEFT_PAREN, "Expect '(' after for statement.");
+			
+			Stmt initializer;
+			if(Match(TokenType.SEMICOLON))
+			{
+				initializer = null;
+			}
+			else if(Match(TokenType.LET))
+			{
+				initializer = LetDeclaration();
+			}else
+			{
+				initializer = ExpressionStatement();
+			}
+			
+			Expr cond = null;
+			if(!Check(TokenType.SEMICOLON))
+			{
+				cond = Expression();
+			}
+			Consume(TokenType.SEMICOLON, "Expect ';' after condition in for statement");
+
+			Expr increment = null;
+			if(!Check(TokenType.RIGHT_PAREN))
+			{
+				increment = Expression();
+			}
+
+			Consume(TokenType.RIGHT_PAREN, "Expect ')' after for expressions.");
+
+			Stmt body = Statement();
+
+			if(increment != null)
+			{
+				body = new Stmt.Block(new List<Stmt>()
+				{
+					body,
+					new Stmt.Expression(increment)
+				});
+			}
+
+			if (cond == null) cond = new Expr.Literal(true);
+			body = new Stmt.While(cond, body);
+
+			if (initializer != null)
+			{
+				body = new Stmt.Block(new List<Stmt>()
+				{
+					initializer,
+					body
+				});
+			}
+
+			return body;
+		}
+
+		private Stmt IfStatement()
+		{
+			Consume(TokenType.LEFT_PAREN, "Expect '(' after if statement.");
+			Expr condition = Expression();
+			Consume(TokenType.RIGHT_PAREN, "Expect '(' after if condition");
+			Stmt then = Statement();
+			Stmt el = Match(TokenType.ELSE) ? Statement() : null;
+
+			return new Stmt.If(condition, then, el);
 		}
 
 		private Stmt PrintStatement()
@@ -191,6 +263,16 @@ namespace Iglu
 			Consume(TokenType.RIGHT_BRACE, "Expect '}', after block.");
 
 			return statements;
+		}
+
+		private Stmt WhileStatement()
+		{
+			Consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.");
+			Expr condition = Expression();
+			Consume(TokenType.RIGHT_PAREN, "Expect ')' after while condition.");
+			Stmt body = Statement();
+
+			return new Stmt.While(condition, body);
 		}
 
 		private Stmt ExpressionStatement()
@@ -236,7 +318,7 @@ namespace Iglu
 
 		private Expr Ternary()
 		{
-			Expr expr = Equality();
+			Expr expr = LogicOr();
 
 			while (Match(TokenType.QUESTION))
 			{
@@ -248,6 +330,34 @@ namespace Iglu
 
 				Expr ifs = new Expr.Binary(ifTrue, oper2, ifFalse);
 				expr = new Expr.Binary(expr, oper1, ifs);
+			}
+
+			return expr;
+		}
+
+		private Expr LogicOr()
+		{
+			Expr expr = LogicAnd();
+
+			while (Match(TokenType.OR))
+			{
+				Token oper = Previous();
+				Expr right = LogicOr();
+				expr = new Expr.Binary(expr, oper, right);
+			}
+
+			return expr;
+		}
+
+		private Expr LogicAnd()
+		{
+			Expr expr = Equality();
+
+			while (Match(TokenType.AND))
+			{
+				Token oper = Previous();
+				Expr right = LogicAnd();
+				expr = new Expr.Binary(expr, oper, right);
 			}
 
 			return expr;
@@ -319,8 +429,48 @@ namespace Iglu
 			}
 			else
 			{
-				return Primary();
+				return Call();
 			}
+		}
+
+		private Expr FinishCall(Expr expr)
+		{
+			List<Expr> args = new List<Expr>();
+
+			if(!Check(TokenType.RIGHT_PAREN))
+			{
+				do
+				{
+					if(args.Count >= 255)
+					{
+						Error(Peek(), "Cannot have more than 255 arguments.");
+					}
+					args.Add(Expression());
+				}
+				while (Match(TokenType.COMMA));
+			}
+
+			Token paren = Consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments");
+
+			return new Expr.Call(expr, paren, args);
+		}
+
+		private Expr Call()
+		{
+			Expr expr = Primary();
+
+			while (true)
+			{
+				if (Match(TokenType.LEFT_PAREN))
+				{
+					expr = FinishCall(expr);
+				}else
+				{
+					break;
+				}
+			}
+
+			return expr;
 		}
 
 		private Expr Primary()
