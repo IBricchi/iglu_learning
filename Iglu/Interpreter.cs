@@ -9,6 +9,9 @@ namespace Iglu
 	{
 		public readonly Env globals = new Env();
 		private Env environment;
+
+		private readonly Dictionary<Expr, int> locals = new Dictionary<Expr, int>();
+
 		private bool REPL;
 
 		public void Interpret(List<Stmt> statements, bool REPL)
@@ -75,6 +78,26 @@ namespace Iglu
 			}
 		}
 
+		public void Resolve(Expr expr, int depth)
+		{
+			locals[expr] = depth;
+		}
+
+		private object LookUpVariable(Token name, Expr expr)
+		{
+			int distance = -1;
+			if (locals.ContainsKey(expr)) distance = locals[expr];
+
+			if(distance != -1)
+			{
+				return environment.GetAt(distance, name.lexeme);
+			}
+			else
+			{
+				return globals.Get(name);
+			}
+		}
+
 		private bool IsTruthy(object obj)
 		{
 			if (obj == null) return false;
@@ -104,6 +127,17 @@ namespace Iglu
 		public object visitAssignExpr(Expr.Assign expr)
 		{
 			object value = Evaluate(expr.value);
+
+			int distance = -1;
+			if (locals.ContainsKey(expr)) distance = locals[expr];
+			if(distance != -1)
+			{
+				environment.AssignAt(distance, expr.name, value);
+			}
+			else
+			{
+				environment.Assign(expr.name, value);
+			}
 
 			environment.Assign(expr.name, value);
 			return value;
@@ -308,10 +342,19 @@ namespace Iglu
 
 		public Void visitFunctionStmt(Stmt.Function stmt)
 		{
-			Function fn = new Function(stmt);
-			environment.Define(stmt.name.lexeme, fn);
+			Function fn = new Function(stmt, environment);
+			if(stmt.name != null) environment.Define(stmt.name.lexeme, fn);
 
 			return null;
+		}
+
+		public Void visitReturnStmt(Stmt.Return stmt)
+		{
+			object value =  null;
+
+			if (stmt.value != null) value = Evaluate(stmt.value);
+
+			throw new Return(value);
 		}
 	}
 }

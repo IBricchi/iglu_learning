@@ -24,6 +24,27 @@ namespace Iglu
 			values[name] = value;
 		}
 
+		private Env Ancestor(int distance)
+		{
+			Env env = this;
+			for (int i = 0; i < distance; i++)
+			{
+				env = env.enclosing;
+			}
+
+			return env;
+		}
+
+		public object GetAt(int distance, string name)
+		{
+			return Ancestor(distance).values[name];
+		}
+
+		public void AssignAt(int distance, Token name, object value)
+		{
+			Ancestor(distance).values[name.lexeme] = value;
+		}
+
 		public void Assign(Token name, object value)
 		{
 			if(values.ContainsKey(name.lexeme))

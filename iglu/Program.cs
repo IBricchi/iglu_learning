@@ -75,15 +75,21 @@ namespace Iglu
 			// {
 			//	 Console.Out.WriteLine(token);
 			// }
+			//
+			// prints out parsed tree
+			// Console.Out.WriteLine(new AstPrinter().Print(expression));
 
 			Parser parser = new Parser(tokens);
 			List<Stmt> statements = parser.Parse();
-
+			
 			// stop if syntax error
 			if (hadError) return;
 
-			// prints out parsed tree
-			// Console.Out.WriteLine(new AstPrinter().Print(expression));
+			Resolver resolver = new Resolver(interpreter);
+			resolver.Resolve(statements);
+
+			// Stop if there was a resolution error.
+			if (hadError) return;
 
 			// interpret
 			interpreter.Interpret(statements, REPL);

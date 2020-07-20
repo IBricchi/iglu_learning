@@ -34,6 +34,7 @@ namespace Tool
 					"Expression : Expr expression",
 					"Function   : Token name, List<Token> parameters, List<Stmt> body",
 					"Print      : Expr expression",
+					"Return     : Token keyword, Expr value",
 					"Let        : Token name, Expr initializer",
 					"While      : Expr condition, Stmt body"
 				});
