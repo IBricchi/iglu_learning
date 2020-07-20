@@ -22,15 +22,18 @@ namespace Tool
 					"Assign   : Token name, Expr value",
 					"Binary   : Expr left, Token oper, Expr right",
 					"Call     : Expr callee, Token paren, List<Expr> args",
+					"Get      : Expr obj, Token name",
 					"Grouping : Expr expression",
 					"Literal  : object value",
 					"Unary    : Token oper, Expr right",
+					"Set      : Expr obj, Token name, Expr value",
 					"Variable : Token name"
 				});
 
 				DefineAst(outputDir, "Stmt", new List<string>(){
 					"Block      : List<Stmt> statements",
 					"If         : Expr condition, Stmt then, Stmt el",
+					"Class      : Token name, List<Stmt.Function> methods",
 					"Expression : Expr expression",
 					"Function   : Token name, List<Token> parameters, List<Stmt> body",
 					"Print      : Expr expression",

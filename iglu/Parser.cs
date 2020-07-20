@@ -139,8 +139,9 @@ namespace Iglu
 		{
 			try
 			{
-				if (Match(TokenType.FUN)) return FunDeclaration("function");
 				if (Match(TokenType.LET)) return LetDeclaration();
+				if (Match(TokenType.FUN)) return FunDeclaration("function");
+				if (Match(TokenType.CLASS)) return ClassDeclaration();
 
 				return Statement();
 			}
@@ -165,7 +166,7 @@ namespace Iglu
 			return new Stmt.Let(name, initializer);
 		}
 
-		private Stmt FunDeclaration(string kind)
+		private Stmt.Function FunDeclaration(string kind)
 		{
 			Token name = null;
 			if(Check(TokenType.IDENTIFIER))
@@ -208,6 +209,22 @@ namespace Iglu
 			List<Stmt> body = Block();
 
 			return body;
+		}
+
+		private Stmt ClassDeclaration()
+		{
+			Token name = Consume(TokenType.IDENTIFIER, "Expect class name.");
+			Consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
+
+			List<Stmt.Function> methods = new List<Stmt.Function>();
+			while(!Check(TokenType.RIGHT_BRACE))
+			{
+				methods.Add(FunDeclaration("method"));
+			}
+
+			Consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
+
+			return new Stmt.Class(name, methods);
 		}
 
 		private Stmt Statement()
@@ -352,10 +369,14 @@ namespace Iglu
 				Token equals = Previous();
 				Expr value = Assignment();
 
-				if(expr is Expr.Variable)
+				if(expr is Expr.Variable @variable)
 				{
-					Token name = ((Expr.Variable)expr).name;
+					Token name = @variable.name;
 					return new Expr.Assign(name, value);
+				}
+				else if(expr is Expr.Get @get)
+				{
+					return new Expr.Set(@get.obj, @get.name, value);
 				}
 				Error(equals, "Invalid assignment target.");
 			}
@@ -525,7 +546,13 @@ namespace Iglu
 				if (Match(TokenType.LEFT_PAREN))
 				{
 					expr = FinishCall(expr);
-				}else
+				}
+				else if (Match(TokenType.DOT))
+				{
+					Token name = Consume(TokenType.IDENTIFIER, "Expect property name after '.'.");
+					expr = new Expr.Get(expr, name);
+				}
+				else
 				{
 					break;
 				}

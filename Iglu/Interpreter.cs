@@ -41,13 +41,11 @@ namespace Iglu
 		{
 			if (obj == null) return "null";
 
-			if (obj is double) return obj.ToString();
-
 			if (obj is bool) return IsTruthy(obj) ? "true" : "false";
 
 			if (obj is string @string) return @string;
 
-			return "";
+			return obj.ToString();
 		}
 
 		public object Evaluate(Expr expr)
@@ -280,6 +278,33 @@ namespace Iglu
 			return environment.Get(expr.name);
 		}
 
+		public object visitGetExpr(Expr.Get expr)
+		{
+			object obj = Evaluate(expr.obj);
+			if(obj is Instance)
+			{
+				return ((Instance)obj).Get(expr.name);
+			}
+
+			throw new RuntimeError(expr.name, "Only instances have properties.");
+		}
+
+		public object visitSetExpr(Expr.Set expr)
+		{
+			object obj = Evaluate(expr.obj);
+
+			if(!(obj is Instance))
+			{
+				throw new RuntimeError(expr.name, "Only instances have fields");
+			}
+
+			object value = Evaluate(expr.value);
+
+			((Instance)obj).Set(expr.name, value);
+			
+			return value;
+		}
+
 		public Void visitBlockStmt(Stmt.Block stmt)
 		{
 			bool previous = REPL;
@@ -355,6 +380,15 @@ namespace Iglu
 			if (stmt.value != null) value = Evaluate(stmt.value);
 
 			throw new Return(value);
+		}
+
+		public Void visitClassStmt(Stmt.Class stmt)
+		{
+			environment.Define(stmt.name.lexeme, null);
+			Class klass = new Class(stmt.name.lexeme);
+			environment.Assign(stmt.name, klass);
+
+			return null;
 		}
 	}
 }

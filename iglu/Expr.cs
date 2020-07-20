@@ -10,9 +10,11 @@ namespace Iglu
 			R visitAssignExpr(Assign expr);
 			R visitBinaryExpr(Binary expr);
 			R visitCallExpr(Call expr);
+			R visitGetExpr(Get expr);
 			R visitGroupingExpr(Grouping expr);
 			R visitLiteralExpr(Literal expr);
 			R visitUnaryExpr(Unary expr);
+			R visitSetExpr(Set expr);
 			R visitVariableExpr(Variable expr);
 		}
 		public class Assign : Expr
@@ -67,6 +69,22 @@ namespace Iglu
 				return visitor.visitCallExpr(this);
 			}
 		}
+		public class Get : Expr
+		{
+			public Get(Expr obj, Token name)
+			{
+				this.obj = obj;
+				this.name = name;
+			}
+
+			public readonly Expr obj;
+			public readonly Token name;
+
+			public override R Accept<R>(IVisitor<R> visitor)
+			{
+				return visitor.visitGetExpr(this);
+			}
+		}
 		public class Grouping : Expr
 		{
 			public Grouping(Expr expression)
@@ -109,6 +127,24 @@ namespace Iglu
 			public override R Accept<R>(IVisitor<R> visitor)
 			{
 				return visitor.visitUnaryExpr(this);
+			}
+		}
+		public class Set : Expr
+		{
+			public Set(Expr obj, Token name, Expr value)
+			{
+				this.obj = obj;
+				this.name = name;
+				this.value = value;
+			}
+
+			public readonly Expr obj;
+			public readonly Token name;
+			public readonly Expr value;
+
+			public override R Accept<R>(IVisitor<R> visitor)
+			{
+				return visitor.visitSetExpr(this);
 			}
 		}
 		public class Variable : Expr

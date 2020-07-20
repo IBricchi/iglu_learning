@@ -29,6 +29,11 @@ namespace iglu
 			throw new NotImplementedException();
 		}
 
+		public string visitGetExpr(Expr.Get expr)
+		{
+			throw new NotImplementedException();
+		}
+
 		public string visitGroupingExpr(Expr.Grouping expr)
 		{
 			return Parenthesize("group", expr.expression);
@@ -38,6 +43,11 @@ namespace iglu
 		{
 			if (expr.value == null) return "null";
 			return expr.value.ToString();
+		}
+
+		public string visitSetExpr(Expr.Set expr)
+		{
+			throw new NotImplementedException();
 		}
 
 		public string visitUnaryExpr(Expr.Unary expr)

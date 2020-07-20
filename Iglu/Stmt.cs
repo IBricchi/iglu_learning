@@ -9,6 +9,7 @@ namespace Iglu
 		{
 			R visitBlockStmt(Block stmt);
 			R visitIfStmt(If stmt);
+			R visitClassStmt(Class stmt);
 			R visitExpressionStmt(Expression stmt);
 			R visitFunctionStmt(Function stmt);
 			R visitPrintStmt(Print stmt);
@@ -46,6 +47,22 @@ namespace Iglu
 			public override R Accept<R>(IVisitor<R> visitor)
 			{
 				return visitor.visitIfStmt(this);
+			}
+		}
+		public class Class : Stmt
+		{
+			public Class(Token name, List<Stmt.Function> methods)
+			{
+				this.name = name;
+				this.methods = methods;
+			}
+
+			public readonly Token name;
+			public readonly List<Stmt.Function> methods;
+
+			public override R Accept<R>(IVisitor<R> visitor)
+			{
+				return visitor.visitClassStmt(this);
 			}
 		}
 		public class Expression : Stmt

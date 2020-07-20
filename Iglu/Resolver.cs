@@ -161,6 +161,21 @@ namespace Iglu
 			return null;
 		}
 
+		public Void visitGetExpr(Expr.Get expr)
+		{
+			Resolve(expr.obj);
+
+			return null;
+		}
+
+		public Void visitSetExpr(Expr.Set expr)
+		{
+			Resolve(expr.value);
+			Resolve(expr.obj);
+
+			return null;
+		}
+
 
 
 
@@ -234,6 +249,14 @@ namespace Iglu
 		{
 			Resolve(stmt.condition);
 			Resolve(stmt.body);
+
+			return null;
+		}
+
+		public Void visitClassStmt(Stmt.Class stmt)
+		{
+			Declare(stmt.name);
+			Define(stmt.name);
 
 			return null;
 		}
