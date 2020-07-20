@@ -47,17 +47,17 @@ namespace Iglu
 			return "";
 		}
 
-		private object Evaluate(Expr expr)
+		public object Evaluate(Expr expr)
 		{
 			return expr.Accept(this);
 		}
 
-		private void Execute(Stmt statement)
+		public void Execute(Stmt statement)
 		{
 			statement.Accept(this);
 		}
 
-		private void ExecuteBlock(List<Stmt> statements, Env environment)
+		public void ExecuteBlock(List<Stmt> statements, Env environment)
 		{
 			Env previous = this.environment;
 			try
@@ -302,6 +302,14 @@ namespace Iglu
 			{
 				Execute(stmt.body);
 			}
+
+			return null;
+		}
+
+		public Void visitFunctionStmt(Stmt.Function stmt)
+		{
+			Function fn = new Function(stmt);
+			environment.Define(stmt.name.lexeme, fn);
 
 			return null;
 		}

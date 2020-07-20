@@ -115,7 +115,7 @@ namespace Iglu
 					{
 						case TokenType.CLASS:
 						case TokenType.COMMA:
-						case TokenType.DEF:
+						case TokenType.FUN:
 						case TokenType.FOR:
 						case TokenType.IF:
 						case TokenType.LET:
@@ -139,6 +139,7 @@ namespace Iglu
 		{
 			try
 			{
+				if (Match(TokenType.FUN)) return FunDeclaration("function");
 				if (Match(TokenType.LET)) return LetDeclaration();
 
 				return Statement();
@@ -162,6 +163,33 @@ namespace Iglu
 
 			Consume(TokenType.SEMICOLON, "Expect ';' after variable declaration");
 			return new Stmt.Let(name, initializer);
+		}
+
+		private Stmt FunDeclaration(string kind)
+		{
+			Token name = Consume(TokenType.IDENTIFIER, "Expect " + kind + " name.");
+
+			Consume(TokenType.LEFT_PAREN, "Expect '(' after " + kind + " name.");
+
+			List<Token> parameters = new List<Token>();
+			if(!Check(TokenType.RIGHT_PAREN))
+			{
+				do
+				{
+					if (parameters.Count >= 255)
+					{
+						Error(Peek(), "Cannot have more than 255 parameters");
+					}
+					parameters.Add(Consume(TokenType.IDENTIFIER, "Expected parameter name."));
+				}
+				while (Match(TokenType.COMMA));
+			}
+			Consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
+
+			Consume(TokenType.LEFT_BRACE, "Expect '{' before " + kind + " body.");
+			List<Stmt> body = Block();
+
+			return new Stmt.Function(name, parameters, body);
 		}
 
 		private Stmt Statement()
@@ -284,7 +312,7 @@ namespace Iglu
 
 		private Expr Assignment()
 		{
-			Expr expr = Commation();
+			Expr expr = Ternary();
 
 			if(Match(TokenType.EQUAL))
 			{
@@ -302,19 +330,19 @@ namespace Iglu
 			return expr;
 		}
 
-		private Expr Commation() // terrible name I know
-		{
-			Expr expr = Ternary();
+		//private Expr Commation() // terrible name I know
+		//{
+		//	Expr expr = Ternary();
 
-			while(Match(TokenType.COMMA))
-			{
-				Token oper = Previous();
-				Expr right = Ternary();
-				expr = new Expr.Binary(expr, oper, right);
-			}
+		//	while(Match(TokenType.COMMA))
+		//	{
+		//		Token oper = Previous();
+		//		Expr right = Ternary();
+		//		expr = new Expr.Binary(expr, oper, right);
+		//	}
 
-			return expr;
-		}
+		//	return expr;
+		//}
 
 		private Expr Ternary()
 		{

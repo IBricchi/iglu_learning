@@ -32,6 +32,7 @@ namespace Tool
 					"Block      : List<Stmt> statements",
 					"If         : Expr condition, Stmt then, Stmt el",
 					"Expression : Expr expression",
+					"Function   : Token name, List<Token> parameters, List<Stmt> body",
 					"Print      : Expr expression",
 					"Let        : Token name, Expr initializer",
 					"While      : Expr condition, Stmt body"
