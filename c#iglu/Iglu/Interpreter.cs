@@ -305,6 +305,13 @@ namespace Iglu
 			return value;
 		}
 
+		public object visitThisExpr(Expr.This expr)
+		{
+			return LookUpVariable(expr.keyword, expr);
+		}
+
+
+
 		public Void visitBlockStmt(Stmt.Block stmt)
 		{
 			bool previous = REPL;
@@ -385,7 +392,16 @@ namespace Iglu
 		public Void visitClassStmt(Stmt.Class stmt)
 		{
 			environment.Define(stmt.name.lexeme, null);
-			Class klass = new Class(stmt.name.lexeme);
+
+			Dictionary<string, Function> methods = new Dictionary<string, Function>();
+
+			foreach(Stmt.Function method in stmt.methods)
+			{
+				Function fn = new Function(method, environment);
+				methods.Add(method.name.lexeme, fn);
+			}
+
+			Class klass = new Class(stmt.name.lexeme, methods);
 			environment.Assign(stmt.name, klass);
 
 			return null;

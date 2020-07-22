@@ -40,6 +40,13 @@ namespace Iglu
 			return null;
 		}
 
+		public Function Bind(Instance instance)
+		{
+			Env environment = new Env(closure);
+			environment.Define("this", instance);
+			return new Function(declaration, environment);
+		}
+
 		public override string ToString()
 		{
 			return "<fn " + declaration.name.lexeme + " >";

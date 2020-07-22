@@ -19,7 +19,8 @@ namespace Iglu
 		private enum FunctionType
 		{
 			NONE,
-			FUNCTION
+			FUNCTION,
+			METHOD
 		}
 
 		public void Resolve(List<Stmt> stmts)
@@ -151,6 +152,7 @@ namespace Iglu
 
 		public Void visitVariableExpr(Expr.Variable expr)
 		{
+			var a = scopes.Peek();
 			if(scopes.Count != 0 && scopes.Peek()[expr.name.lexeme] == false)
 			{
 				Program.Error(expr.name, "Cannot read local variable in its own initializer.");
@@ -176,6 +178,12 @@ namespace Iglu
 			return null;
 		}
 
+		public Void visitThisExpr(Expr.This expr)
+		{
+			ResolveLocal(expr, expr.keyword);
+
+			return null;
+		}
 
 
 
@@ -257,6 +265,18 @@ namespace Iglu
 		{
 			Declare(stmt.name);
 			Define(stmt.name);
+
+			BeginScope();
+			
+			scopes.Peek().Add("this", true);
+
+			foreach(Stmt.Function fn in stmt.methods)
+			{
+				FunctionType declaration = FunctionType.METHOD;
+				ResolveFunction(fn, declaration);
+			}
+
+			EndScope();
 
 			return null;
 		}

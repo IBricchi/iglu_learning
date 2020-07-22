@@ -14,6 +14,7 @@ namespace Iglu
 			R visitGroupingExpr(Grouping expr);
 			R visitLiteralExpr(Literal expr);
 			R visitUnaryExpr(Unary expr);
+			R visitThisExpr(This expr);
 			R visitSetExpr(Set expr);
 			R visitVariableExpr(Variable expr);
 		}
@@ -127,6 +128,20 @@ namespace Iglu
 			public override R Accept<R>(IVisitor<R> visitor)
 			{
 				return visitor.visitUnaryExpr(this);
+			}
+		}
+		public class This : Expr
+		{
+			public This(Token keyword)
+			{
+				this.keyword = keyword;
+			}
+
+			public readonly Token keyword;
+
+			public override R Accept<R>(IVisitor<R> visitor)
+			{
+				return visitor.visitThisExpr(this);
 			}
 		}
 		public class Set : Expr

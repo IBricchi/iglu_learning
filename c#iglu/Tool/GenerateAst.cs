@@ -26,6 +26,7 @@ namespace Tool
 					"Grouping : Expr expression",
 					"Literal  : object value",
 					"Unary    : Token oper, Expr right",
+					"This     : Token keyword",
 					"Set      : Expr obj, Token name, Expr value",
 					"Variable : Token name"
 				});

@@ -579,6 +579,10 @@ namespace Iglu
 			{
 				return new Expr.Literal(Previous().literal);
 			}
+			else if (Match(TokenType.THIS))
+			{
+				return new Expr.This(Previous());
+			}
 			else if (Match(TokenType.IDENTIFIER))
 			{
 				return new Expr.Variable(Previous());
