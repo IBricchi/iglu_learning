@@ -13,6 +13,7 @@ int main(int argc, char** argv)
 	uint8_t constant = addConstant(&chunk, 1.2);
 	writeChunk(&chunk, OP_CONSTANT, 1);
 	writeChunk(&chunk, constant, 1);
+	writeChunk(&chunk, OP_NEGATE, 1);
 
 	writeChunk(&chunk, OP_RETURN, 1);
 
