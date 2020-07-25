@@ -1,9 +1,6 @@
 #pragma once
 
-typedef struct {
-	const char* start;
-	const char* current;
-	int line;
-} Scanner;
+#include "token.h"
 
 void initScanner(const char* source);
+Token scanToken();

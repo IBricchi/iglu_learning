@@ -32,5 +32,3 @@ typedef struct {
 	int length;
 	int line;
 } Token;
-
-Token scanToken(Scanner* scanner)
