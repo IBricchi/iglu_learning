@@ -39,7 +39,7 @@ static char advance() {
 }
 
 static bool match(char expected){
-	if(isAtEnd(scanner)) return false;
+	if(isAtEnd()) return false;
 	if(*scanner.current != expected) return false;
 
 	scanner.current++;
@@ -51,7 +51,7 @@ static char peek() {
 }
 
 static char peekNext() {
-	if (isAtEnd(scanner)) return '\0';
+	if (isAtEnd()) return '\0';
 	return scanner.current[1];
 }
 
@@ -79,25 +79,23 @@ static Token string();
 
 static void skipWhitespace() {
 	while(true) {
-		char c = peek(scanner);
+		char c = peek();
 		switch (c) {
 		case ' ':
 		case '\r':
 		case '\t':
-			advance(scanner);
+			advance();
 			break;
 		
 		case '\n':
 			scanner.line++;
-			advance(scanner);
+			advance();
 			break;
 
 		case '/':
-			if (peekNext(scanner) == '/') {
-				while(peek(scanner) != '\n' && !isAtEnd(scanner)) advance(scanner);
+			if (peekNext() == '/') {
+				while(peek() != '\n' && !isAtEnd()) advance();
 			}
-
-		case '"': string(scanner); return;
 
 		default:
 			return;
@@ -150,49 +148,50 @@ static TokenType identifierType() {
 }
 
 static Token string() {
-	while (peek(scanner) != '"' && !isAtEnd(scanner)) {
-		if (peek(scanner) == '\n') scanner.line++;
-		advance(scanner);
+	advance();
+	while (peek() != '"' && !isAtEnd()) {
+		if (peek() == '\n') scanner.line++;
+		advance();
 	}
 
-	if (isAtEnd(scanner)) return errorToken("Unterminated string.");
+	if (isAtEnd()) return errorToken("Unterminated string.");
 
 	// The closing quote.
-	advance(scanner);
+	advance();
 	return makeToken(TOKEN_STRING);
 }
 
 static Token number() {
-	while (isDigit(peek(scanner))) advance(scanner);
+	while (isDigit(peek())) advance();
 
 	// Look for a fractional part.
-	if (peek(scanner) == '.' && isDigit(peekNext(scanner))) {
+	if (peek() == '.' && isDigit(peekNext())) {
 		// Consume the ".".
-		advance(scanner);
+		advance();
 
-		while (isDigit(peek(scanner))) advance(scanner);
+		while (isDigit(peek())) advance();
 	}
 
 	return makeToken(TOKEN_NUMBER);
 }
 
 static Token identifier() {
-	while(isAlpha(peek(scanner)) || isDigit(peek(scanner))) advance(scanner);
+	while(isAlpha(peek()) || isDigit(peek())) advance();
 
-	return makeToken(identifierType(scanner));
+	return makeToken(identifierType());
 }
 
 Token scanToken() {
-	skipWhitespace(scanner);
+	skipWhitespace();
 
 	scanner.start = scanner.current;
 
-	if (isAtEnd(scanner)) return makeToken(TOKEN_EOF);
+	if (isAtEnd()) return makeToken(TOKEN_EOF);
 
-	char c = advance(scanner);
+	char c = advance();
 
-	if (isDigit(c)) return number(scanner);
-	if (isAlpha(c)) return identifier(scanner);
+	if (isDigit(c)) return number();
+	if (isAlpha(c)) return identifier();
 
 	switch (c) {
 	case '(': return makeToken(TOKEN_LEFT_PAREN);
@@ -206,6 +205,7 @@ Token scanToken() {
 	case '+': return makeToken(TOKEN_PLUS);
 	case '/': return makeToken(TOKEN_SLASH);
 	case '*': return makeToken(TOKEN_STAR);
+	case '"': return string();
 
 	case '!':
 		return makeToken(match('=') ? TOKEN_BANG_EQUAL : TOKEN_BANG);
@@ -215,7 +215,6 @@ Token scanToken() {
 		return makeToken(match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
 	case '>':
 		return makeToken(match('=') ?TOKEN_GREATER_EQUAL : TOKEN_GREATER);
-
 	}
 
 	return errorToken("Unexpected character.");

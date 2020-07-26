@@ -78,6 +78,9 @@ int main(int argc, char** argv)
 	}
 	else {
 		fprintf(stderr, "Usage: iglu [path]\n");
+		exit(64);
 	}
+
+	freeVM();
 	return 0;
 }
