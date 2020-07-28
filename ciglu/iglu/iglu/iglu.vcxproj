@@ -146,6 +146,7 @@
     <ClCompile Include="memory.c" />
     <ClCompile Include="object.c" />
     <ClCompile Include="scanner.c" />
+    <ClCompile Include="table.c" />
     <ClCompile Include="token.c" />
     <ClCompile Include="value.c" />
     <ClCompile Include="vm.c" />
@@ -158,6 +159,7 @@
     <ClInclude Include="memory.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="scanner.h" />
+    <ClInclude Include="table.h" />
     <ClInclude Include="token.h" />
     <ClInclude Include="value.h" />
     <ClInclude Include="vm.h" />
